@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id  String @id @default(cuid())
+  fullname  String
+  email String @unique
+  password  String
+  image String
+  image_url String
+  phone String
+  address String
+  role String
+  refresh_token String?  @db.Text
+  createdAt DateTime  @default(now())
+  Wishlist  Wishlist[]
+  Cart Cart[]
+  Order Order[]
+  Shipment  Shipment[]
+}
+
+model Products {
+  id  String @id @default(cuid())
+  name  String
+  brand String
+  description String
+  image String
+  image_url String
+  price_idr String
+  price_pi  String
+  stock String
+  createdAt DateTime  @default(now())
+  Category  String?
+  Categories  Categories? @relation(fields: [Category],references: [name])
+  Wishlist  Wishlist[]
+  CartItem  CartItem[]
+  OrderDetail  OrderDetail[]
+}
+
+model Categories {
+  id  String @id @default(cuid())
+  name  String @unique
+  description String
+  Products Products[]
+  createdAt DateTime @default(now())
+}
+
+model Wishlist {
+  id  String  @id @default(cuid())
+  UserId  String?
+  User  User? @relation(fields: [UserId], references: [id])
+  productId String?
+  Products  Products? @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([UserId, productId])
+}
+
+model Cart {
+  id  String @id  @default(cuid())
+  Userid  String?
+  User User? @relation(fields: [Userid], references: [id])
+  CartItem  CartItem[]
+}
+
+model CartItem {
+  id  String @id @default(cuid())
+  quantity  Int
+  cartId  String?
+  Cart  Cart? @relation(fields: [cartId],references: [id])
+  ProductId String?
+  Products  Products? @relation(fields: [ProductId], references: [id])
+}
+
+model Order {
+  id String @id @default(cuid())
+  order_date  DateTime @default(now())
+  total_price String
+  OrderDetail OrderDetail[]
+  ShipmentId  String?
+  Shipment Shipment? @relation(fields: [ShipmentId], references: [id])
+  UserId  String?
+  User User? @relation(fields: [UserId],references: [id])
+  Status  String
+}
+
+model OrderDetail {
+  id       String    @id @default(cuid())
+  orderId  String
+  Order    Order?  @relation(fields: [orderId], references: [id])
+  productId String?
+  product  Products? @relation(fields: [productId], references: [id])
+  quantity Int
+  price    String
+}
+
+model Shipment {
+  id  String @id @default(cuid())
+  shipment_date DateTime @default(now())
+  address String
+  city  String
+  state String
+  country String
+  zip_code  String
+  UserId  String?
+  User  User? @relation(fields: [UserId], references: [id])
+  Order Order[]
+}
