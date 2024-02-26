@@ -22,6 +22,19 @@ exports.getAllProducts = async (req, res) => {
   }
 }
 
+exports.Products = async (req, res) => {
+  try {
+    const skip = (page - 1) * limit;
+    const products = await prisma.products.findMany();
+    if (!products) return res.status(404).json({ msg: 'Product tidak ditemukan!' });
+    res.status(200).json({products});
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+}
+
+
+
 exports.getProductByid = async (req, res) => {
   try {
     const product = await prisma.products.findFirst({
